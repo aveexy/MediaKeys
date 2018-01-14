@@ -116,19 +116,19 @@ void loop() {
 		SendReport(VOLUME_DOWN);
 	}
 
-	if (GetButtonClick(3, 0)) {
+	if (GetButtonClick(3, 1)) {
 		SendReport(VOLUME_UP);
 	}
 
-	if (GetButtonClick(4, 0)) {
+	if (GetButtonClick(4, 2)) {
 		SendReport(REMOTE_PREVIOUS);
 	}
 
-	if (GetButtonClick(5, 0)) {
+	if (GetButtonClick(5, 3)) {
 		SendReport(REMOTE_PLAYPAUSE);
 	}
 
-	if (GetButtonClick(6, 0)) {
+	if (GetButtonClick(6, 4)) {
 		SendReport(REMOTE_NEXT);
 	}
 }
