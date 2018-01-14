@@ -4,9 +4,6 @@
  Author:	Av_
 */
 
-//#define HID_ENABLED
-
-#include <Keyboard.h>
 #include <HID.h>
 
 #define REMOTE_CLEAR 0
@@ -18,34 +15,34 @@
 
 static const u8 _hidReportDescriptor[] PROGMEM = {
 
-	0x05, 0x0c,                    //	Usage Page (Consumer Devices)
-	0x09, 0x01,                    //	Usage (Consumer Control)
-	0xa1, 0x01,                    //	Collection (Application)
-	0x85, 0x04,                    //	REPORT_ID (4)
-	0x15, 0x00,                    //	Logical Minimum (0)
-	0x25, 0x01,                    //	Logical Maximum (1)
+	0x05, 0x0c, //	Usage Page (Consumer Devices)
+	0x09, 0x01, //	Usage (Consumer Control)
+	0xa1, 0x01, //	Collection (Application)
+	0x85, 0x04, //	REPORT_ID (4)
+	0x15, 0x00, //	Logical Minimum (0)
+	0x25, 0x01, //	Logical Maximum (1)
 
-	0x09, 0xe9,                    //	Usage (Volume Up)
-	0x09, 0xea,                    //	Usage (Volume Down)
-	0x75, 0x01,                    //	Report Size (1)
-	0x95, 0x02,                    //	Report Count (2)
-	0x81, 0x06,                    //	Input (Data, Variable, Relative)
+	0x09, 0xe9, //	Usage (Volume Up)
+	0x09, 0xea, //	Usage (Volume Down)
+	0x75, 0x01, //	Report Size (1)
+	0x95, 0x02, //	Report Count (2)
+	0x81, 0x06, //	Input (Data, Variable, Relative)
 
-	0x09, 0xcd,                    //	Usage (Play/Pause)
-	0x95, 0x01,                    //	Report Count (1)
-	0x81, 0x06,                    //	Input (Data, Variable, Relative)
+	0x09, 0xcd, //	Usage (Play/Pause)
+	0x95, 0x01, //	Report Count (1)
+	0x81, 0x06, //	Input (Data, Variable, Relative)
 
-	0x09, 0xb5,                    //	Usage (Next)
-	0x95, 0x01,                    //	Report Count (1)
-	0x81, 0x06,                    //	Input (Data, Variable, Relative)
+	0x09, 0xb5, //	Usage (Next)
+	0x95, 0x01, //	Report Count (1)
+	0x81, 0x06, //	Input (Data, Variable, Relative)
 
-	0x09, 0xb6,                    //	Usage (Previous)
-	0x95, 0x01,                    //	Report Count (1)
-	0x81, 0x06,                    //	Input (Data, Variable, Relative)
+	0x09, 0xb6, //	Usage (Previous)
+	0x95, 0x01, //	Report Count (1)
+	0x81, 0x06, //	Input (Data, Variable, Relative)
 
-	0x95, 0x03,                    //	Report Count (3) Number of bits remaining in byte
-	0x81, 0x07,                    //	Input (Constant, Variable, Relative) 
-	0xc0                           //	End Collection
+	0x95, 0x03, //	Report Count (3) Number of bits remaining in byte
+	0x81, 0x07, //	Input (Constant, Variable, Relative) 
+	0xc0        //	End Collection
 };
 
 inline boolean extractState(unsigned int state) {
@@ -93,7 +90,7 @@ void SendReport(u8 id) {
 	m[1] = 0;
 	HID().SendReport(4, m, 2);
 
-	m[0] = 0;
+	m[0] = REMOTE_CLEAR;
 	m[1] = 0;
 	HID().SendReport(4, m, 2);
 }
@@ -102,15 +99,11 @@ void setup() {
 	pinMode(LED_BUILTIN, OUTPUT);
 	digitalWrite(LED_BUILTIN, HIGH);
 
-	pinMode(2, INPUT_PULLUP);
-	pinMode(3, INPUT_PULLUP);
-	pinMode(4, INPUT_PULLUP);
-	pinMode(5, INPUT_PULLUP);
-	pinMode(6, INPUT_PULLUP);
-	pinMode(7, INPUT_PULLUP);
+	for (u8 i = 2; i < 8; i++) {
+		pinMode(i, INPUT_PULLUP);
+	}
 
-	boolean switchState = digitalRead(7);
-	if (switchState) {
+	if (digitalRead(7)) {
 		static HIDSubDescriptor node(_hidReportDescriptor, sizeof(_hidReportDescriptor));
 		HID().AppendDescriptor(&node);
 		HID().begin();
@@ -119,45 +112,23 @@ void setup() {
 }
 
 void loop() {
-	boolean volumeDownButton = GetButtonClick(2, 0);
-	boolean volumeUpButton = GetButtonClick(3, 1);
-	boolean prevButton = GetButtonClick(4, 2);
-	boolean playPauseButton = GetButtonClick(5, 3);
-	boolean nextButton = GetButtonClick(6, 4);
-
-	if (volumeDownButton) {
+	if (GetButtonClick(2, 0)) {
 		SendReport(VOLUME_DOWN);
 	}
 
-	if (volumeUpButton) {
+	if (GetButtonClick(3, 0)) {
 		SendReport(VOLUME_UP);
 	}
 
-	if (prevButton) {
+	if (GetButtonClick(4, 0)) {
 		SendReport(REMOTE_PREVIOUS);
 	}
 
-	if (playPauseButton) {
+	if (GetButtonClick(5, 0)) {
 		SendReport(REMOTE_PLAYPAUSE);
 	}
 
-	if (nextButton) {
+	if (GetButtonClick(6, 0)) {
 		SendReport(REMOTE_NEXT);
 	}
-
-
-	//delay(100);
-
-	//if (!previousSwitchValue && switchState) {
-	//	queuedBlinksToDo += 2; // +2 because on and off
-	//}
-	//previousSwitchValue = switchState;
-
-	//// blinks will be 250ms long
-	//if (queuedBlinksToDo != 0 && (millis() - blinkTimer > 250)) {
-	//	queuedBlinksToDo--;
-	//	blinkTimer = millis();
-	//	digitalWrite(OUTPUT_BLINKCOUNT, queuedBlinksToDo & 1);
-	//}
-
 }
